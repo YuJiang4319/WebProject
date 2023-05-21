@@ -29,7 +29,11 @@ repositories {
 
 dependencies {
     implementation (
+            'mysql:mysql-connector-java:+',
             'org.springframework.boot:spring-boot-starter',
-            'org.springframework.boot:spring-boot-starter-web'
+            'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-mail',
+            'org.springframework.boot:spring-boot-starter-data-redis',
+            'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2',
     )
 }
