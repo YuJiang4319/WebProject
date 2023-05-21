@@ -1,0 +1,35 @@
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.6.3'
+    id 'io.spring.dependency-management' version '1.0.14.RELEASE'
+}
+
+group 'cn.kawauso'
+version '1.0'
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'cn.kawauso.Application'
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        (configurations.runtimeClasspath).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven{ url 'https://www.jitpack.io' }
+    maven{ url 'https://maven.aliyun.com/nexus/content/groups/public'}
+    maven{ url 'https://maven.aliyun.com/nexus/content/repositories/jcenter'}
+}
+
+dependencies {
+    implementation (
+            'org.springframework.boot:spring-boot-starter',
+            'org.springframework.boot:spring-boot-starter-web'
+    )
+}
