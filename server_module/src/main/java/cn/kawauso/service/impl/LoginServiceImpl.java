@@ -28,7 +28,7 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public Object authLoginRequest(String email, String password) {
 
-        String answer = userInfoMapper.getUserPassword(email);
+        String answer = userInfoMapper.getUserPasswordByEmail(email);
 
         if (answer == null) {
             throw new RuntimeException("对应此邮箱的用户不存在！");

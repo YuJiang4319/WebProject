@@ -12,8 +12,12 @@
         insert into UserInfoMap (user_id, password, email) values (#{userId}, #{password}, #{email})
     </insert>
 
-    <select id="getUserPassword" resultType="java.lang.String">
+    <select id="getUserPasswordByEmail" resultType="java.lang.String">
         select password from UserInfoMap where email = #{email}
+    </select>
+
+    <select id="getUserIdByEmail" resultType="long">
+        select user_id from UserInfoMap where email = #{email}
     </select>
 
 </mapper>

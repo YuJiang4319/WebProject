@@ -27,11 +27,19 @@ public interface UserInfoMapper {
     void insertUserInfo(UserInfo userInfo);
 
     /**
-     * 获取到指定邮箱的用户密码
+     * 根据给定的用户邮箱，获取到对应的用户密码
      *
      * @param email 邮箱
      * @return 对应此邮箱的用户密码
      */
-    String getUserPassword(String email);
+    String getUserPasswordByEmail(String email);
+
+    /**
+     * 根据给定的用户邮箱，获取到对应的用户id
+     *
+     * @param email 邮箱
+     * @return 对应此邮箱的用户id
+     */
+    long getUserIdByEmail(String email);
 
 }

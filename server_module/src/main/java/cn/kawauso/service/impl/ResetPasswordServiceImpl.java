@@ -3,9 +3,7 @@ package cn.kawauso.service.impl;
 import cn.kawauso.auth.TokenVerifier;
 import cn.kawauso.entity.UserInfo;
 import cn.kawauso.mapper.UserInfoMapper;
-import cn.kawauso.service.RegisterService;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.github.yitter.idgen.YitIdHelper;
+import cn.kawauso.service.ResetPasswordService;
 import io.lettuce.core.api.sync.RedisCommands;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,14 +12,14 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 /**
- * {@link RegisterServiceImpl}是{@link RegisterService}的默认实现类
+ * {@link ResetPasswordServiceImpl}是{@link ResetPasswordService}的默认实现类
  *
  * @author RealDragonking
  */
 @Service
-public class RegisterServiceImpl implements RegisterService {
+public class ResetPasswordServiceImpl implements ResetPasswordService {
 
-    private static final String EMAIL_CODE_PREFIX = "register:email:";
+    private static final String EMAIL_CODE_PREFIX = "reset:email:";
     private static final long EMAIL_CODE_TIMEOUT = 20 * 60 * 1000;
 
     private final RedisCommands<String, String> redisCommands;
@@ -29,10 +27,10 @@ public class RegisterServiceImpl implements RegisterService {
     private final TokenVerifier tokenVerifier;
     private final JavaMailSender mailSender;
 
-    public RegisterServiceImpl(RedisCommands<String, String> redisCommands,
-                               UserInfoMapper userInfoMapper,
-                               TokenVerifier tokenVerifier,
-                               JavaMailSender mailSender) {
+    public ResetPasswordServiceImpl(RedisCommands<String, String> redisCommands,
+                                    UserInfoMapper userInfoMapper,
+                                    TokenVerifier tokenVerifier,
+                                    JavaMailSender mailSender) {
         this.redisCommands = redisCommands;
         this.userInfoMapper = userInfoMapper;
         this.tokenVerifier = tokenVerifier;
@@ -40,16 +38,16 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     /**
-     * 启动注册一个新账号的流程，向已经进行过预检验的邮箱，发送包含验证码的邮件，并将其加入到验证码等候队列中
+     * 启动重置密码的流程，向已经进行过预检验的邮箱，发送包含验证码的邮件，并将其加入到验证码等候队列中
      *
-     * @param email 申请注册的邮箱
+     * @param email 已经进行过注册的邮箱
      * @return 响应结果
      */
     @Override
     public Object sendEmailCode(String email) {
 
-        if (userInfoMapper.getUsersWithEmail(email) > 0) {
-            throw new RuntimeException("此邮箱已被注册！");
+        if (userInfoMapper.getUsersWithEmail(email) == 0) {
+            throw new RuntimeException("对应此邮箱的用户不存在！");
         }
 
         String emailCode = String.valueOf((int)((Math.random() * 9 + 1) * 100000));
@@ -57,7 +55,7 @@ public class RegisterServiceImpl implements RegisterService {
         redisCommands.setex(EMAIL_CODE_PREFIX + email, EMAIL_CODE_TIMEOUT, emailCode);
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setSubject("我们正在注册账号，需要验证您的邮箱！");
+        message.setSubject("我们正在重置账号的密码，需要验证您的邮箱！");
         message.setFrom("2146844288@qq.com");
         message.setTo(email);
         message.setText("您的验证码为 " + emailCode + " ，有效期为20分钟！");
@@ -68,9 +66,9 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     /**
-     * 提交申请注册的邮箱和接收到的验证码，检验是否合法
+     * 提交申请重置密码的邮箱和接收到的验证码，校验是否合法
      *
-     * @param email      申请注册的邮箱
+     * @param email     已经进行过注册的邮箱
      * @param emailCode 邮箱验证码
      * @return 响应结果
      */
@@ -89,25 +87,16 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     /**
-     * 提交用户账号初始化相关信息，注册一个新的账号
+     * 提交用户id和新设置的密码，重置账号密码
      *
-     * @param token    为账号初始化提供鉴权支持的token
-     * @param userInfo {@link UserInfo}，包含了用户账号的初始化信息
+     * @param token    为账号密码重置提供鉴权支持的token
+     * @param userInfo {@link UserInfo}，仅包含新设置的密码
      * @return 响应结果
      */
     @Override
-    public Object registerNewAccount(String token, UserInfo userInfo) {
-
-        DecodedJWT decodedJWT = tokenVerifier.verifyToken(token);
-
-        long userId = YitIdHelper.nextId();
-        String email = decodedJWT.getClaim("email").asString();
-
-        userInfo.setUserId(userId);
-        userInfo.setEmail(email);
-
-        userInfoMapper.insertUserInfo(userInfo);
-
-        return "ok";
+    public Object resetPassword(String token, UserInfo userInfo) {
+        //
+        return null;
     }
+
 }

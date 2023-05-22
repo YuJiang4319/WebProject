@@ -56,14 +56,14 @@ public final class RegisterController {
     }
 
     /**
-     * 提交账号初始化token和相关信息，注册一个新的账号
+     * 提交账号初始化关信息，注册一个新的账号
      *
-     * @param token 账号初始化的token，也是用户id
-     * @param userInfo {@link UserInfo}，包含了用户的部分信息
+     * @param token 为账号初始化提供鉴权支持的token
+     * @param userInfo {@link UserInfo}，包含了用户的初始化信息
      * @return 响应结果
      */
     @RequestMapping(path = "/new-account", method = RequestMethod.POST)
-    public Object registerNewAccount(long token, @RequestBody UserInfo userInfo) {
+    public Object registerNewAccount(String token, @RequestBody UserInfo userInfo) {
 
         if (userInfo.getPassword() == null) {
             throw new RuntimeException("提交参数不完整！");
