@@ -13,12 +13,6 @@ spring:
     host: 121.199.44.151
     port: 6379
     password: dk20030110
-    lettuce:
-      pool:
-        max-active: 100
-        max-idle: 3
-        min-idle: 0
-        max-wait: -1
   mail:
     host: smtp.qq.com
     port: 587

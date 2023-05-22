@@ -2,12 +2,12 @@ package cn.kawauso.service.impl;
 
 import cn.kawauso.mapper.UserInfoMapper;
 import cn.kawauso.service.RegisterService;
-import org.springframework.data.redis.core.RedisTemplate;
+import io.lettuce.core.api.sync.RedisCommands;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 /**
  * {@link RegisterServiceImpl}是{@link RegisterService}的默认实现类
@@ -17,14 +17,18 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class RegisterServiceImpl implements RegisterService {
 
-    private final RedisTemplate<String, String> redisTemplate;
+    private static final String SETTING_TOKEN_PREFIX = "token:";
+    private static final String EMAIL_CODE_PREFIX = "code:";
+    private static final long EMAIL_CODE_TIMEOUT = 20 * 60 * 1000;
+
+    private final RedisCommands<String, String> redisCommands;
     private final UserInfoMapper userInfoMapper;
     private final JavaMailSender mailSender;
 
-    public RegisterServiceImpl(RedisTemplate<String, String> redisTemplate,
+    public RegisterServiceImpl(RedisCommands<String, String> redisCommands,
                                UserInfoMapper userInfoMapper,
                                JavaMailSender mailSender) {
-        this.redisTemplate = redisTemplate;
+        this.redisCommands = redisCommands;
         this.userInfoMapper = userInfoMapper;
         this.mailSender = mailSender;
     }
@@ -32,34 +36,52 @@ public class RegisterServiceImpl implements RegisterService {
     /**
      * 启动注册一个新账号的流程，向已经进行过预检验的邮箱，发送包含验证码的邮件，并将其加入到验证码等候队列中
      *
-     * @param mail 邮箱
+     * @param email 邮箱
      * @return 响应结果
      */
     @Override
-    public Object registerNewAccount(String mail) {
+    public Object sendEmailCode(String email) {
 
-        if (userInfoMapper.getUsersWithMail(mail) > 0) {
+        if (userInfoMapper.getUsersWithMail(email) > 0) {
             throw new RuntimeException("此邮箱已被注册！");
         }
 
-        String verifyCode = String.valueOf((int)((Math.random() * 9 + 1) * Math.pow(10,5)));
+        String emailCode = String.valueOf((int)((Math.random() * 9 + 1) * 100000));
 
-        Boolean setResult = redisTemplate.opsForValue().setIfAbsent(mail, verifyCode, 120, TimeUnit.SECONDS);
-        assert setResult != null;
-
-        if (! setResult) {
-            throw new RuntimeException("此邮箱正在被使用注册！");
-        }
+        redisCommands.setex(EMAIL_CODE_PREFIX + email, EMAIL_CODE_TIMEOUT, emailCode);
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setSubject("我们正在注册账号，需要验证您的邮箱！");
         message.setFrom("2146844288@qq.com");
-        message.setTo(mail);
-        message.setText("您的验证码为 " + verifyCode + " ，有效期为120秒！");
+        message.setTo(email);
+        message.setText("您的验证码为 " + emailCode + " ，有效期为20分钟！");
 
         mailSender.send(message);
 
-        return "success";
+        return null;
+    }
+
+    /**
+     * 提交申请注册的邮箱和接收到的验证码，检验是否合法
+     *
+     * @param email      邮箱
+     * @param emailCode 邮箱验证码
+     * @return 响应结果
+     */
+    @Override
+    public Object authEmailCode(String email, String emailCode) {
+
+        String answer = redisCommands.get(EMAIL_CODE_PREFIX + email);
+
+        if (answer == null || ! answer.equals(emailCode)) {
+            throw new RuntimeException("验证码已经失效！");
+        }
+
+        String token = UUID.randomUUID().toString();
+
+        redisCommands.setnx(SETTING_TOKEN_PREFIX + email, token);
+
+        return token;
     }
 
 }

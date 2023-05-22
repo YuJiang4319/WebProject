@@ -21,19 +21,31 @@ public final class RegisterController {
     }
 
     /**
-     * 使用给定的邮箱，启动注册新账号的流程
+     * 使用给定的邮箱，发送邮箱验证码，启动注册新账号的流程
      *
-     * @param mail 邮箱
+     * @param email 邮箱
      * @return 响应结果
      */
-    @RequestMapping(path = "/new", method = RequestMethod.POST)
-    public Object registerNewAccount(String mail) {
+    @RequestMapping(path = "/send-email-code", method = RequestMethod.POST)
+    public Object sendEmailCode(String email) {
 
-        if (! mail.matches("[\\w.\\-]+@([\\w\\-]+\\.)+[\\w\\-]+")) {
+        if (! email.matches("[\\w.\\-]+@([\\w\\-]+\\.)+[\\w\\-]+")) {
             throw new RuntimeException("邮箱格式错误！");
         }
 
-        return registerService.registerNewAccount(mail);
+        return registerService.sendEmailCode(email);
+    }
+
+    /**
+     * 验证邮箱及对应的邮箱验证码是否有效，有效的话进入账号初始化流程
+     *
+     * @param email 邮箱
+     * @param emailCode 邮箱验证码
+     * @return 响应结果
+     */
+    @RequestMapping(path = "/auth-email-code", method = RequestMethod.POST)
+    public Object authEmailCode(String email, String emailCode) {
+        return registerService.authEmailCode(email, emailCode);
     }
 
 }
