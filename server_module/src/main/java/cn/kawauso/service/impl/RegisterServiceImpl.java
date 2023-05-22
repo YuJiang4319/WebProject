@@ -1,13 +1,16 @@
 package cn.kawauso.service.impl;
 
+import cn.kawauso.entity.UserInfo;
 import cn.kawauso.mapper.UserInfoMapper;
 import cn.kawauso.service.RegisterService;
+import com.github.yitter.idgen.YitIdHelper;
 import io.lettuce.core.api.sync.RedisCommands;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import java.util.Map;
 
 /**
  * {@link RegisterServiceImpl}是{@link RegisterService}的默认实现类
@@ -17,8 +20,6 @@ import java.util.UUID;
 @Service
 public class RegisterServiceImpl implements RegisterService {
 
-    private static final String SETTING_TOKEN_PREFIX = "token:";
-    private static final String EMAIL_CODE_PREFIX = "code:";
     private static final long EMAIL_CODE_TIMEOUT = 20 * 60 * 1000;
 
     private final RedisCommands<String, String> redisCommands;
@@ -42,13 +43,13 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public Object sendEmailCode(String email) {
 
-        if (userInfoMapper.getUsersWithMail(email) > 0) {
+        if (userInfoMapper.getUsersWithEmail(email) > 0) {
             throw new RuntimeException("此邮箱已被注册！");
         }
 
         String emailCode = String.valueOf((int)((Math.random() * 9 + 1) * 100000));
 
-        redisCommands.setex(EMAIL_CODE_PREFIX + email, EMAIL_CODE_TIMEOUT, emailCode);
+        redisCommands.setex(email, EMAIL_CODE_TIMEOUT, emailCode);
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setSubject("我们正在注册账号，需要验证您的邮箱！");
@@ -71,17 +72,42 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public Object authEmailCode(String email, String emailCode) {
 
-        String answer = redisCommands.get(EMAIL_CODE_PREFIX + email);
+        String answer = redisCommands.get(email);
 
         if (answer == null || ! answer.equals(emailCode)) {
             throw new RuntimeException("验证码已经失效！");
         }
 
-        String token = UUID.randomUUID().toString();
+        String token = String.valueOf(YitIdHelper.nextId());
 
-        redisCommands.setnx(SETTING_TOKEN_PREFIX + email, token);
+        redisCommands.setnx(token, email);
 
-        return token;
+        return Map.of("token", token);
+    }
+
+    /**
+     * 提交账号初始化token，检验是否合法，然后进行账号信息的注册
+     *
+     * @param token 账号初始化的token，也是用户id
+     * @param userInfo {@link UserInfo}，包含了用户的部分信息
+     * @return 响应结果
+     */
+    @Override
+    @Transactional
+    public Object registerNewAccount(long token, UserInfo userInfo) {
+
+        String email = redisCommands.getdel(String.valueOf(token));
+
+        if (email == null) {
+            throw new RuntimeException("无效的账号初始化token！");
+        }
+
+        userInfo.setUserId(token);
+        userInfo.setEmail(email);
+
+        userInfoMapper.insertUserInfo(userInfo);
+
+        return null;
     }
 
 }

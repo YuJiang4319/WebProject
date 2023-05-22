@@ -1,5 +1,7 @@
 package cn.kawauso;
 
+import com.github.yitter.contract.IdGeneratorOptions;
+import com.github.yitter.idgen.YitIdHelper;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.sync.RedisCommands;
@@ -17,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 public class Application {
 
     public static void main(String[] args) {
+        YitIdHelper.setIdGenerator(new IdGeneratorOptions());
         SpringApplication.run(Application.class, args);
     }
 

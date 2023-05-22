@@ -4,9 +4,12 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.kawauso.mapper.UserInfoMapper">
 
-    <select id="getUsersWithMail" resultType="int">
-        select count(1) from UserInfoMap
-        where mail = #{mail}
+    <select id="getUsersWithEmail" resultType="int">
+        select count(1) from UserInfoMap where email = #{email}
     </select>
+
+    <insert id="insertUserInfo">
+        insert into UserInfoMap (user_id, password, email) values (#{userId}, #{password}, #{email})
+    </insert>
 
 </mapper>

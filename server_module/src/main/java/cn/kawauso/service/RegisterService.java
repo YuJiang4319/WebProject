@@ -1,5 +1,7 @@
 package cn.kawauso.service;
 
+import cn.kawauso.entity.UserInfo;
+
 /**
  * {@link RegisterService}提供了注册服务相关的接口方法
  *
@@ -23,5 +25,14 @@ public interface RegisterService {
      * @return 响应结果
      */
     Object authEmailCode(String email, String emailCode);
+
+    /**
+     * 提交账号初始化token，检验是否合法，然后进行账号信息的注册
+     *
+     * @param token 账号初始化的token，也是用户id
+     * @param userInfo {@link UserInfo}，包含了用户的部分信息
+     * @return 响应结果
+     */
+    Object registerNewAccount(long token, UserInfo userInfo);
 
 }

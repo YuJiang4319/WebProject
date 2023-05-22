@@ -1,5 +1,6 @@
 package cn.kawauso.mapper;
 
+import cn.kawauso.entity.UserInfo;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -13,9 +14,16 @@ public interface UserInfoMapper {
     /**
      * 获取到指定邮箱的用户数量
      *
-     * @param mail 邮箱
+     * @param email 邮箱
      * @return 对应此邮箱的用户数量
      */
-    int getUsersWithMail(String mail);
+    int getUsersWithEmail(String email);
+
+    /**
+     * 插入{@link UserInfo}记录的用户信息，注册一个新的用户
+     *
+     * @param userInfo {@link UserInfo}
+     */
+    void insertUserInfo(UserInfo userInfo);
 
 }
