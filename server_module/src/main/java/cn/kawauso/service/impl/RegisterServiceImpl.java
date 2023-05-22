@@ -20,6 +20,7 @@ import java.util.Map;
 @Service
 public class RegisterServiceImpl implements RegisterService {
 
+    private static final String REGISTER_PREFIX = "register:";
     private static final long EMAIL_CODE_TIMEOUT = 20 * 60 * 1000;
 
     private final RedisCommands<String, String> redisCommands;
@@ -49,7 +50,7 @@ public class RegisterServiceImpl implements RegisterService {
 
         String emailCode = String.valueOf((int)((Math.random() * 9 + 1) * 100000));
 
-        redisCommands.setex(email, EMAIL_CODE_TIMEOUT, emailCode);
+        redisCommands.setex(REGISTER_PREFIX + email, EMAIL_CODE_TIMEOUT, emailCode);
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setSubject("我们正在注册账号，需要验证您的邮箱！");
@@ -59,7 +60,7 @@ public class RegisterServiceImpl implements RegisterService {
 
         mailSender.send(message);
 
-        return null;
+        return "ok";
     }
 
     /**
@@ -72,7 +73,7 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public Object authEmailCode(String email, String emailCode) {
 
-        String answer = redisCommands.get(email);
+        String answer = redisCommands.get(REGISTER_PREFIX + email);
 
         if (answer == null || ! answer.equals(emailCode)) {
             throw new RuntimeException("验证码已经失效！");
@@ -81,12 +82,13 @@ public class RegisterServiceImpl implements RegisterService {
         String token = String.valueOf(YitIdHelper.nextId());
 
         redisCommands.setnx(token, email);
+        redisCommands.del(REGISTER_PREFIX + email);
 
         return Map.of("token", token);
     }
 
     /**
-     * 提交账号初始化token，检验是否合法，然后进行账号信息的注册
+     * 提交账号初始化token和相关信息，注册一个新的账号
      *
      * @param token 账号初始化的token，也是用户id
      * @param userInfo {@link UserInfo}，包含了用户的部分信息
@@ -107,7 +109,7 @@ public class RegisterServiceImpl implements RegisterService {
 
         userInfoMapper.insertUserInfo(userInfo);
 
-        return null;
+        return "ok";
     }
 
 }

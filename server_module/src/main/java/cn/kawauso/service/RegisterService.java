@@ -27,7 +27,7 @@ public interface RegisterService {
     Object authEmailCode(String email, String emailCode);
 
     /**
-     * 提交账号初始化token，检验是否合法，然后进行账号信息的注册
+     * 提交账号初始化token和相关信息，注册一个新的账号
      *
      * @param token 账号初始化的token，也是用户id
      * @param userInfo {@link UserInfo}，包含了用户的部分信息

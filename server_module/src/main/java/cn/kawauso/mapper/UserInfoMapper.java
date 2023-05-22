@@ -26,4 +26,12 @@ public interface UserInfoMapper {
      */
     void insertUserInfo(UserInfo userInfo);
 
+    /**
+     * 获取到指定邮箱的用户密码
+     *
+     * @param email 邮箱
+     * @return 对应此邮箱的用户密码
+     */
+    String getUserPassword(String email);
+
 }

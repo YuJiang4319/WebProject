@@ -53,9 +53,7 @@ public class ResponseControllerAdvice implements ResponseBodyAdvice<Object> {
                                   Class<? extends HttpMessageConverter<?>> selectedConverterType,
                                   ServerHttpRequest request,
                                   ServerHttpResponse response) {
-        if (body == null) {
-            return "{\"code\":1}";
-        } else if (body instanceof String) {
+        if (body instanceof String) {
             return "{\"code\": 1, \"data\": \"" + body + "\"}";
         } else if (body instanceof ErrorMessage) {
             return Map.of("code", 0, "msg", ((ErrorMessage) body).getMessage());
