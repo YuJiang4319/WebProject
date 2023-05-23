@@ -12,12 +12,12 @@
         insert into UserInfoMap (user_id, password, email) values (#{userId}, #{password}, #{email})
     </insert>
 
-    <select id="getUserPasswordByEmail" resultType="java.lang.String">
-        select password from UserInfoMap where email = #{email}
+    <select id="getUserInfoByEmail" resultMap="entity.UserInfo">
+        select user_id, password from UserInfoMap where email = #{email}
     </select>
 
-    <select id="getUserIdByEmail" resultType="long">
-        select user_id from UserInfoMap where email = #{email}
-    </select>
+    <update id="updateUserPassword">
+        update UserInfoMap set password = #{newPassword} where user_id = #{userId}
+    </update>
 
 </mapper>

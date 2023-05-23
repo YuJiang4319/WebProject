@@ -27,19 +27,19 @@ public interface UserInfoMapper {
     void insertUserInfo(UserInfo userInfo);
 
     /**
-     * 根据给定的用户邮箱，获取到对应的用户密码
+     * 根据给定的用户邮箱，获取到对应的{@link UserInfo}用户基本信息
      *
      * @param email 邮箱
-     * @return 对应此邮箱的用户密码
+     * @return {@link UserInfo}
      */
-    String getUserPasswordByEmail(String email);
+    UserInfo getUserInfoByEmail(String email);
 
     /**
-     * 根据给定的用户邮箱，获取到对应的用户id
+     * 根据给定的用户id和新密码，修改用户的密码
      *
-     * @param email 邮箱
-     * @return 对应此邮箱的用户id
+     * @param userId 用户id
+     * @param newPassword 新的密码
      */
-    long getUserIdByEmail(String email);
+    void updateUserPassword(long userId, String newPassword);
 
 }

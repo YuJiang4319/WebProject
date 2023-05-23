@@ -1,8 +1,12 @@
 package cn.kawauso.service.impl;
 
+import cn.kawauso.auth.TokenVerifier;
+import cn.kawauso.entity.UserInfo;
 import cn.kawauso.mapper.UserInfoMapper;
 import cn.kawauso.service.LoginService;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 /**
  * {@link LoginServiceImpl}是{@link LoginService}的默认实现类
@@ -13,9 +17,11 @@ import org.springframework.stereotype.Service;
 public class LoginServiceImpl implements LoginService {
 
     private final UserInfoMapper userInfoMapper;
+    private final TokenVerifier tokenVerifier;
 
-    public LoginServiceImpl(UserInfoMapper userInfoMapper) {
+    public LoginServiceImpl(UserInfoMapper userInfoMapper, TokenVerifier tokenVerifier) {
         this.userInfoMapper = userInfoMapper;
+        this.tokenVerifier = tokenVerifier;
     }
 
     /**
@@ -28,7 +34,8 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public Object authLoginRequest(String email, String password) {
 
-        String answer = userInfoMapper.getUserPasswordByEmail(email);
+        UserInfo userInfo = userInfoMapper.getUserInfoByEmail(email);
+        String answer = userInfo.getPassword();
 
         if (answer == null) {
             throw new RuntimeException("对应此邮箱的用户不存在！");
@@ -38,7 +45,9 @@ public class LoginServiceImpl implements LoginService {
             throw new RuntimeException("密码校验错误！");
         }
 
-        return "ok";
+        String token = tokenVerifier.generateToken(Map.of("userId", userInfo.getUserId()));
+
+        return Map.of("token", token);
     }
 
 }

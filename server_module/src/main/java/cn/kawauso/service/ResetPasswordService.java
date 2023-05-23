@@ -1,7 +1,5 @@
 package cn.kawauso.service;
 
-import cn.kawauso.entity.UserInfo;
-
 /**
  * {@link ResetPasswordService}提供了重置密码服务相关的接口方法
  *
@@ -27,12 +25,12 @@ public interface ResetPasswordService {
     Object authEmailCode(String email, String emailCode);
 
     /**
-     * 提交用户id和新设置的密码，重置账号密码
+     * 提交ticket和新设置的密码，重置账号密码
      *
-     * @param token 为账号密码重置提供鉴权支持的token
-     * @param userInfo {@link UserInfo}，仅包含新设置的密码
+     * @param ticket 为账号密码重置提供鉴权支持的一次性ticket
+     * @param newPassword 新设置的密码
      * @return 响应结果
      */
-    Object resetPassword(String token, UserInfo userInfo);
+    Object resetPassword(long ticket, String newPassword);
 
 }

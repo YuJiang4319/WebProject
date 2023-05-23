@@ -47,29 +47,24 @@ public final class RegisterController {
      */
     @RequestMapping(path = "/auth-email-code", method = RequestMethod.POST)
     public Object authEmailCode(String email, String emailCode) {
-
-        if (! email.matches("[\\w.\\-]+@([\\w\\-]+\\.)+[\\w\\-]+")) {
-            throw new RuntimeException("邮箱格式错误！");
-        }
-
         return registerService.authEmailCode(email, emailCode);
     }
 
     /**
-     * 提交账号初始化关信息，注册一个新的账号
+     * 提交ticket和账号初始化信息，注册一个新的账号
      *
-     * @param token 为账号初始化提供鉴权支持的token
+     * @param ticket 为账号初始化提供鉴权支持的一次性ticket
      * @param userInfo {@link UserInfo}，包含了用户的初始化信息
      * @return 响应结果
      */
     @RequestMapping(path = "/new-account", method = RequestMethod.POST)
-    public Object registerNewAccount(String token, @RequestBody UserInfo userInfo) {
+    public Object registerNewAccount(long ticket, @RequestBody UserInfo userInfo) {
 
         if (userInfo.getPassword() == null) {
             throw new RuntimeException("提交参数不完整！");
         }
 
-        return registerService.registerNewAccount(token, userInfo);
+        return registerService.registerNewAccount(ticket, userInfo);
     }
 
 }

@@ -29,7 +29,7 @@ public final class TokenVerifier {
     /**
      * 使用给定的头部信息和本地密钥，签发一份token
      *
-     * @param headers 头部字段信息
+     * @param headers 头部键值对信息
      * @return token
      */
     public String generateToken(Map<String, Object> headers) {

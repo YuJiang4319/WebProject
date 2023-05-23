@@ -27,12 +27,12 @@ public interface RegisterService {
     Object authEmailCode(String email, String emailCode);
 
     /**
-     * 提交用户账号初始化相关信息，注册一个新的账号
+     * 提交ticket和账号初始化信息，注册一个新的账号
      *
-     * @param token 为账号初始化提供鉴权支持的token
+     * @param ticket 为账号初始化提供鉴权支持的一次性ticket
      * @param userInfo {@link UserInfo}，包含了用户账号的初始化信息
      * @return 响应结果
      */
-    Object registerNewAccount(String token, UserInfo userInfo);
+    Object registerNewAccount(long ticket, UserInfo userInfo);
 
 }
