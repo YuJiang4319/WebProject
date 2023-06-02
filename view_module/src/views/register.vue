@@ -37,11 +37,13 @@
 </template>
   
 <script>
+import CryptoJS from 'crypto-js'
 export default {
     data() {
         return {
             email: '',
             password: '',
+            password_md5:'',
             code: '',
             ticket: null,
             showElement:false,
@@ -86,21 +88,23 @@ export default {
             )
             .then(res => {
                 console.log('验证码验证成功'),
-                console.log(res),
-                this.ticket = res.data.data.ticket
+                console.log(res)
                 if(res.data.code==0){
                     this.msg2 = '验证失败'
                     this.showElement = true
                 }else if(res.data.code==1){
                     this.msg2 = '验证成功'
+                    this.ticket = res.data.data.ticket
                     this.showElement = true
                 }
             })
         },
-        register(password, ticket) { 
+        register(password, ticket,password_md5) { 
             console.log(ticket),
+            password_md5 = CryptoJS.MD5(password).toString(),
+            console.log(password_md5),
             this.$request.post('/register/new-account/'+'?ticket='+this.ticket,{
-                    password:password,
+                    password:password_md5,
                     // ticket:ticket 
                 },{
                     headers: {

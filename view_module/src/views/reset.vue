@@ -37,6 +37,7 @@
 </template>
   
 <script>
+import CryptoJS from 'crypto-js'
 export default {
   name: 'reset',
   data() {
@@ -44,6 +45,7 @@ export default {
       email: '',
       code: '',
       password: '',
+      password_md5:'',
       ticket: null,
       showElement:false,
       msg4: '',
@@ -100,9 +102,11 @@ export default {
         }
       })
     },
-    reset(password,ticket) {
+    reset(password,ticket,password_md5) {
       console.log(ticket)
-      this.$request.post('/help/reset-password/'+'?ticket='+this.ticket+'&newPassword='+this.password, {
+      password_md5 = CryptoJS.MD5(password).toString(),
+      console.log(password_md5),
+      this.$request.post('/help/reset-password/'+'?ticket='+ticket+'&newPassword='+password_md5, {
       }, {
         headers: {
           'Access-Control-Allow-Origin': '*',

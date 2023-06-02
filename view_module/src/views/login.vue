@@ -18,25 +18,29 @@
         </div>
       </form>
     </div>
-  </template>
+</template>
   
 <script>
+import CryptoJS from 'crypto-js'
 export default {
   name: 'login',
   data() {
     return {
       email: '',
       password: '',
+      password_md5:'',
       showElement:false,
       msg: ''
     }
   },
   methods: {
-    login(email, password) {
+    login(email, password,password_md5) {
       console.log('点击成功'+email),
+      password_md5 = CryptoJS.MD5(password).toString(),
+      console.log(password_md5),
         this.$request.post('/login/from-email',{
                 email:email,
-                password:password
+                password:password_md5
             },{
                 headers: {
                     'Content-type': 'application/x-www-form-urlencoded',
